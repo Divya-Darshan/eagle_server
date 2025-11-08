@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaderboard</title>
+</head>
+<body>
+
+<h1>Eagle Scoreboard</h1>
+<table border="1">
+<thead>
+<tr><th>Rank</th><th>User</th><th>Score</th></tr>
+</thead>
+<tbody id="board"></tbody>
+</table>
+
+<script>
+async function load() {
+    let res = await fetch("http://127.0.0.1:8000/leaderboard");
+    let data = await res.json();
+
+    let table = document.getElementById("board");
+    table.innerHTML = "";
+
+    data.forEach((row, i) => {
+        table.innerHTML += `
+            <tr>
+                <td>${i+1}</td>
+                <td>${row.username}</td>
+                <td>${row.score}</td>
+            </tr>
+        `;
+    });
+}
+
+load();
+</script>
+
+</body>
+</html>
