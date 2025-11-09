@@ -6,6 +6,7 @@
 <body>
 
 <h1>Eagle Scoreboard</h1>
+
 <table border="1">
 <thead>
 <tr><th>Rank</th><th>User</th><th>Score</th></tr>
@@ -15,23 +16,33 @@
 
 <script>
 async function load() {
-    let res = await fetch("https://eagle-score.onrender.com/leaderboard");
-    let data = await res.json();
+    try {
+        let res = await fetch("https://eagle-score.onrender.com/leaderboard", {
+            cache: "no-store"  // ✅ prevents browser from caching old data
+        });
+        let data = await res.json();
 
-    let table = document.getElementById("board");
-    table.innerHTML = "";
+        let table = document.getElementById("board");
+        table.innerHTML = "";
 
-    data.forEach((row, i) => {
-        table.innerHTML += `
-            <tr>
-                <td>${i+1}</td>
-                <td>${row.username}</td>
-                <td>${row.score}</td>
-            </tr>
-        `;
-    });
+        data.forEach((row, i) => {
+            table.innerHTML += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${row.username}</td>
+                    <td>${row.score}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.log("Error loading leaderboard:", e);
+    }
 }
 
+// ✅ Auto refresh every 3 seconds
+setInterval(load, 3000);
+
+// ✅ First load instantly
 load();
 </script>
 
