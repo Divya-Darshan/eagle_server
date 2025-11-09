@@ -17,8 +17,7 @@ def load_json():
     try:
         with open(LEADERBOARD_FILE, "r") as f:
             return json.load(f)
-    except Exception as e:
-        print("[ERROR] load_json failed:", e)
+    except:
         return []
 
 
@@ -27,21 +26,21 @@ def save_json(data):
     try:
         with open(LEADERBOARD_FILE, "w") as f:
             json.dump(data, f, indent=2)
-    except Exception as e:
-        print("[ERROR] save_json failed:", e)
+    except:
+        pass
 
 
 class LeaderboardServer(BaseHTTPRequestHandler):
 
-    # ✅ Small helper: send JSON response
+    # ✅ Send JSON
     def send_json(self, data, code=200):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")  # Allow browser
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
 
-    # ✅ Small helper: send HTML file
+    # ✅ Send HTML file
     def send_html(self, filename):
         if not os.path.exists(filename):
             self.send_error(404, "HTML file not found")
@@ -56,77 +55,61 @@ class LeaderboardServer(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(content)
-
-        except Exception as e:
-            print("[ERROR] send_html failed:", e)
+        except:
             self.send_error(500, "Internal Server Error")
 
-    # ----------------------------------------------------
-    # ✅ Handle GET
-    # ----------------------------------------------------
+    # ✅ GET
     def do_GET(self):
-        try:
-            # Serve HTML page
-            if self.path in ("/", "/index.html"):
-                self.send_html(HTML_FILE)
-                return
-
-            # Serve leaderboard JSON
-            if self.path == "/leaderboard":
-                data = load_json()
-                data = sorted(data, key=lambda x: x["score"], reverse=True)
-                self.send_json(data)
-                return
-
-            # Not found
-            self.send_error(404, "Not Found")
-
-        except Exception as e:
-            print("[ERROR] GET failed:", e)
-            self.send_error(500, "Internal Server Error")
-
-    # ----------------------------------------------------
-    # ✅ Handle POST (Godot)
-    # ----------------------------------------------------
-    def do_POST(self):
-        if self.path == "/submit_score":
-            length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(length)
-            data = json.loads(body)
-
-            username = data.get("username", "Unknown")
-            score = data.get("score", 0)
-
-            leaderboard = load_json()
-
-            # ✅ Update or add score
-            found = False
-            for entry in leaderboard:
-                if entry["username"] == username:
-                    entry["score"] = max(entry["score"], score)
-                    found = True
-                    break
-
-            if not found:
-                leaderboard.append({"username": username, "score": score})
-
-            save_json(leaderboard)
-
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(b"Score Saved")
+        if self.path in ("/", "/index.html"):
+            self.send_html(HTML_FILE)
             return
 
-        # If wrong path
-        self.send_error(404, "Invalid POST endpoint")
+        if self.path == "/leaderboard":
+            data = load_json()
+            data = sorted(data, key=lambda x: x["score"], reverse=True)
+            self.send_json(data)
+            return
 
-# ✅ Start server safely
-try:
-    server = HTTPServer(("127.0.0.1", 8000), LeaderboardServer)
-    print("✅ Server running at http://127.0.0.1:8000")
-    server.serve_forever()
+        self.send_error(404, "Not Found")
 
-except KeyboardInterrupt:
-    print("\n✅ Server stopped.")
-except Exception as e:
-    print("❌ Server failed to start:", e)
+    # ✅ POST
+    def do_POST(self):
+        if self.path != "/submit_score":
+            self.send_error(404, "Invalid POST endpoint")
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        data = json.loads(self.rfile.read(length))
+
+        username = data.get("username", "Unknown")
+        score = data.get("score", 0)
+
+        leaderboard = load_json()
+
+        # ✅ Update or insert
+        found = False
+        for entry in leaderboard:
+            if entry["username"] == username:
+                entry["score"] = max(entry["score"], score)
+                found = True
+                break
+
+        if not found:
+            leaderboard.append({"username": username, "score": score})
+
+        save_json(leaderboard)
+
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(b"Score Saved")
+
+
+# ✅ RENDER FIX — dynamic port + 0.0.0.0 binding
+PORT = int(os.environ.get("PORT", 8000))
+
+print(f"✅ Starting server on port {PORT}...")
+server = HTTPServer(("0.0.0.0", PORT), LeaderboardServer)
+print(f"✅ Server running at: 0.0.0.0:{PORT}")
+
+server.serve_forever()
