@@ -5,14 +5,12 @@ import os
 LEADERBOARD_FILE = "leaderboard.json"
 HTML_FILE = "index.html"
 
-
-# ✅ Create file if missing
+# ✅ Create leaderboard file if missing
 if not os.path.exists(LEADERBOARD_FILE):
     with open(LEADERBOARD_FILE, "w") as f:
         f.write("[]")
 
-
-# ✅ Safe JSON load
+# ✅ Safe JSON loader
 def load_json():
     try:
         with open(LEADERBOARD_FILE, "r") as f:
@@ -20,8 +18,7 @@ def load_json():
     except:
         return []
 
-
-# ✅ Safe JSON save
+# ✅ Safe JSON writer
 def save_json(data):
     try:
         with open(LEADERBOARD_FILE, "w") as f:
@@ -32,7 +29,7 @@ def save_json(data):
 
 class LeaderboardServer(BaseHTTPRequestHandler):
 
-    # ✅ Send JSON
+    # ✅ Helper: send JSON response
     def send_json(self, data, code=200):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
@@ -40,10 +37,10 @@ class LeaderboardServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
 
-    # ✅ Send HTML file
+    # ✅ Helper: send HTML
     def send_html(self, filename):
         if not os.path.exists(filename):
-            self.send_error(404, "HTML file not found")
+            self.send_error(404, "HTML not found")
             return
 
         try:
@@ -58,7 +55,9 @@ class LeaderboardServer(BaseHTTPRequestHandler):
         except:
             self.send_error(500, "Internal Server Error")
 
+    # --------------------------------------------------------
     # ✅ GET
+    # --------------------------------------------------------
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self.send_html(HTML_FILE)
@@ -66,31 +65,48 @@ class LeaderboardServer(BaseHTTPRequestHandler):
 
         if self.path == "/leaderboard":
             data = load_json()
+
+            # ✅ FIX: Convert all scores to float
+            for entry in data:
+                try:
+                    entry["score"] = float(entry["score"])
+                except:
+                    entry["score"] = 0
+
+            # ✅ Sort after conversion
             data = sorted(data, key=lambda x: x["score"], reverse=True)
+
             self.send_json(data)
             return
 
         self.send_error(404, "Not Found")
 
-    # ✅ POST
+    # --------------------------------------------------------
+    # ✅ POST (Godot Game Sends Score Here)
+    # --------------------------------------------------------
     def do_POST(self):
         if self.path != "/submit_score":
             self.send_error(404, "Invalid POST endpoint")
             return
 
         length = int(self.headers.get("Content-Length", 0))
-        data = json.loads(self.rfile.read(length))
+        incoming = json.loads(self.rfile.read(length))
 
-        username = data.get("username", "Unknown")
-        score = data.get("score", 0)
+        username = incoming.get("username", "Unknown")
+
+        # ✅ FIX: Always convert incoming string score → float
+        try:
+            score = float(incoming.get("score", 0))
+        except:
+            score = 0
 
         leaderboard = load_json()
 
-        # ✅ Update or insert
+        # ✅ Update / insert
         found = False
         for entry in leaderboard:
             if entry["username"] == username:
-                entry["score"] = max(entry["score"], score)
+                entry["score"] = max(float(entry["score"]), score)
                 found = True
                 break
 
@@ -105,11 +121,13 @@ class LeaderboardServer(BaseHTTPRequestHandler):
         self.wfile.write(b"Score Saved")
 
 
-# ✅ RENDER FIX — dynamic port + 0.0.0.0 binding
+# --------------------------------------------------------
+# ✅ RENDER DEPLOY FIX — dynamic port + public host
+# --------------------------------------------------------
 PORT = int(os.environ.get("PORT", 8000))
 
 print(f"✅ Starting server on port {PORT}...")
 server = HTTPServer(("0.0.0.0", PORT), LeaderboardServer)
-print(f"✅ Server running at: 0.0.0.0:{PORT}")
+print(f"✅ Server running at http://0.0.0.0:{PORT}")
 
 server.serve_forever()
