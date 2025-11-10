@@ -55,6 +55,24 @@ class LeaderboardServer(BaseHTTPRequestHandler):
         except:
             self.send_error(500, "Internal Server Error")
 
+    # ✅ Helper: send static files (CSS, JS)
+    def send_static(self, filename, content_type):
+        if not os.path.exists(filename):
+            self.send_error(404, "File not found")
+            return
+
+        try:
+            with open(filename, "rb") as f:
+                content = f.read()
+
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(content)
+        except:
+            self.send_error(500, "Internal Server Error")
+
     # --------------------------------------------------------
     # ✅ GET
     # --------------------------------------------------------
@@ -77,6 +95,15 @@ class LeaderboardServer(BaseHTTPRequestHandler):
             data = sorted(data, key=lambda x: x["score"], reverse=True)
 
             self.send_json(data)
+            return
+
+        # Serve CSS and JS files
+        if self.path == "/styles.css":
+            self.send_static("styles.css", "text/css")
+            return
+
+        if self.path == "/script.js":
+            self.send_static("script.js", "application/javascript")
             return
 
         self.send_error(404, "Not Found")
