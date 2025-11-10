@@ -1,49 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leaderboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eagle Leaderboard - Flappy Bird Scores</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🦅 Eagle Leaderboard</h1>
+            <p>
+                <span class="refresh-indicator"></span>
+                Live scores • Auto-refreshing every 3 seconds
+            </p>
+        </div>
 
-<h1>Eagle Scoreboard</h1>
+        <div class="leaderboard" id="leaderboard">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading leaderboard...</p>
+            </div>
+        </div>
+    </div>
 
-<table border="1">
-<thead>
-<tr><th>Rank</th><th>User</th><th>Score</th></tr>
-</thead>
-<tbody id="board"></tbody>
-</table>
-
-<script>
-async function load() {
-    try {
-        let res = await fetch("https://eagle-score.onrender.com/leaderboard", {
-            cache: "no-store"  // ✅ prevents browser from caching old data
-        });
-        let data = await res.json();
-
-        let table = document.getElementById("board");
-        table.innerHTML = "";
-
-        data.forEach((row, i) => {
-            table.innerHTML += `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${row.username}</td>
-                    <td>${row.score}</td>
-                </tr>
-            `;
-        });
-    } catch (e) {
-        console.log("Error loading leaderboard:", e);
-    }
-}
-
-// ✅ Auto refresh every 3 seconds
-setInterval(load, 3000);
-
-load();
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
