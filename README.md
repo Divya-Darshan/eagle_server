@@ -1,67 +1,96 @@
-# Eagle Server - Leaderboard Project
+# 🦅 Eagle Server - Leaderboard Project
 
-A simple Python HTTP server for managing a game leaderboard.
+A blazing-fast Python HTTP server for managing game leaderboards. Track scores, compete with friends, and dominate the rankings!
 
-## Prerequisites
+## ✨ Features
+
+- 📊 Real-time leaderboard display with auto-refresh
+- 🚀 Simple REST API for score submissions
+- 💾 Persistent JSON-based storage
+- 🌐 Accessible from any device on your network
+- 🏆 Automatic highest-score tracking per player
+
+## 📋 Prerequisites
 
 - Python 3.6 or higher
 - pip (Python package installer)
 
-## How to Run
+## 🚀 Quick Start
 
-### Option 1: Run with Python's built-in server (Recommended for development)
+### Option 1: Development (Recommended for testing)
 
-1. **Install dependencies** (optional - only needed if using gunicorn):
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+python server.py
+```
 
-2. **Run the server**:
-   ```bash
-   python server.py
-   ```
+Then open your browser to **`http://localhost:8000`** 🎮
 
-3. **Access the application**:
-   - Open your browser and go to: `http://localhost:8000`
-   - The leaderboard will be displayed and auto-refresh every 3 seconds
+The leaderboard will display and automatically refresh every 3 seconds!
 
-### Option 2: Run with Gunicorn (Recommended for production)
+### Option 2: Production (Gunicorn)
 
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+gunicorn server:LeaderboardServer --bind 0.0.0.0:8000
+```
 
-2. **Run with gunicorn**:
-   ```bash
-   gunicorn server:LeaderboardServer --bind 0.0.0.0:8000
-   ```
-   
-   Note: You may need to modify `server.py` slightly for gunicorn compatibility.
+> **Note:** Minor modifications to `server.py` may be needed for full gunicorn compatibility.
 
-### Option 3: Run on a custom port
+### Option 3: Custom Port
 
-Set the `PORT` environment variable:
 ```bash
 PORT=3000 python server.py
 ```
 
-## API Endpoints
+## 🔌 API Endpoints
 
-- `GET /` or `GET /index.html` - Serves the leaderboard HTML page
-- `GET /leaderboard` - Returns JSON data of all leaderboard entries (sorted by score)
-- `POST /submit_score` - Submit a new score
-  - Body: `{"username": "PlayerName", "score": 100}`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` or `/index.html` | Leaderboard webpage |
+| `GET` | `/leaderboard` | JSON leaderboard data (sorted by score) |
+| `POST` | `/submit_score` | Submit a new score |
 
-## Files
+**Submit Score Example:**
+```json
+{
+  "username": "PlayerName",
+  "score": 100
+}
+```
 
-- `server.py` - Main server application
-- `index.html` - Frontend leaderboard display
-- `leaderboard.json` - Data file storing leaderboard entries (auto-created if missing)
-- `requirements.txt` - Python dependencies
+## 📁 Project Structure
 
-## Notes
+```
+eagle_score/
+├── server.py           # Main server logic
+├── index.html          # Leaderboard UI
+├── leaderboard.json    # Score database (auto-generated)
+└── requirements.txt    # Python dependencies
+```
 
-- The server runs on `0.0.0.0` (all interfaces) by default, making it accessible from other devices on your network
-- The leaderboard data is stored in `leaderboard.json` in the same directory
-- If a user submits multiple scores, only their highest score is kept
+## 💡 How It Works
+
+1. **Submit scores** via the POST endpoint
+2. **Highest score wins** - duplicate entries update only if the new score is higher
+3. **Auto-refresh** - the web UI updates every 3 seconds
+4. **Network accessible** - access from any device on your local network
+
+## ⚙️ Configuration
+
+- **Server binds to:** `0.0.0.0` (all network interfaces)
+- **Data storage:** `leaderboard.json` (created automatically)
+- **Default port:** `8000`
+
+## 📝 Notes
+
+- Leaderboard data persists between server restarts
+- Each player's highest score is automatically preserved
+- Perfect for game jams, local tournaments, and competitions!
+
+## Looking for Sponsors
+
+We're looking for sponsors interested in supporting this project. If you'd like to partner with us or run ads, let's talk!
+
+---
+
