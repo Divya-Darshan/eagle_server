@@ -20,22 +20,13 @@ A blazing-fast Python HTTP server for managing game leaderboards. Track scores, 
 ### Option 1: Development (Recommended for testing)
 
 ```bash
-pip install -r requirements.txt
+
 python server.py
 ```
 
 Then open your browser to **`http://localhost:8000`** 🎮
 
 The leaderboard will display and automatically refresh every 3 seconds!
-
-### Option 2: Production (Gunicorn)
-
-```bash
-pip install -r requirements.txt
-gunicorn server:LeaderboardServer --bind 0.0.0.0:8000
-```
-
-> **Note:** Minor modifications to `server.py` may be needed for full gunicorn compatibility.
 
 ### Option 3: Custom Port
 
