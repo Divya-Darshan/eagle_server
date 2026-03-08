@@ -76,8 +76,8 @@ eagle_score/
 ## 📝 Notes
 
 - Leaderboard data persists between server restarts
-- Each player's highest score is automatically preserved
-- Perfect for game jams, local tournaments, and competitions!
+- Each player's highest score is automatically preserved 
+
 
 ## Looking for Sponsors
 
