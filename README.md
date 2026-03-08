@@ -78,10 +78,3 @@ eagle_score/
 - Leaderboard data persists between server restarts
 - Each player's highest score is automatically preserved 
 
-
-## Looking for Sponsors
-
-We're looking for sponsors interested in supporting this project. If you'd like to partner with us or run ads, let's talk!
-
----
-
